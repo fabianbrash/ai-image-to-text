@@ -1,10 +1,5 @@
 import ray
 import os
-import torch
-from PIL import Image
-from transformers import VisionEncoderDecoderModel, ViTFeatureExtractor, BertTokenizer
-from torch.utils.data import DataLoader
-from torch.optim import AdamW
 
 # ✅ Connect to Remote Ray Cluster
 ray.init(address="ray://<HEAD_NODE_IP>:10001")  # Replace with your Ray cluster IP
@@ -12,6 +7,13 @@ ray.init(address="ray://<HEAD_NODE_IP>:10001")  # Replace with your Ray cluster 
 @ray.remote(num_gpus=1)
 class TrainModel:
     def __init__(self):
+        import subprocess
+        import torch
+        from transformers import VisionEncoderDecoderModel, ViTFeatureExtractor, BertTokenizer
+
+        # ✅ Install dependencies dynamically on the Ray worker
+        subprocess.run(["pip", "install", "torch", "torchvision", "transformers", "datasets", "pillow"])
+        
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
         # Load Pretrained Model
@@ -20,6 +22,10 @@ class TrainModel:
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
 
     def train_model(self, images, labels, epochs=10, batch_size=2):
+        import torch
+        from torch.utils.data import DataLoader
+        from torch.optim import AdamW
+        
         """Fine-tunes the model using the given dataset."""
         dataloader = DataLoader(list(zip(images, labels)), batch_size=batch_size, shuffle=True)
         optimizer = AdamW(self.model.parameters(), lr=5e-5)
@@ -47,7 +53,9 @@ class TrainModel:
         return {"status": "Training Completed", "epochs": epochs}
 
 # ✅ Load and Upload Data to Ray
+
 def load_dataset(image_folder, label_folder):
+    import PIL.Image as Image
     images, labels = [], []
     for img_name in os.listdir(image_folder):
         if img_name.endswith(('.jpg', '.png')):
