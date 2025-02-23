@@ -18,7 +18,7 @@ spec:
         app: fine-tune-llm
     spec:
       containers:
-      - image: us-east4-docker.pkg.dev/fb-registry/fb-publicrepo/mandarin-ocr-app@sha256:551916e3c6b0e06ecdc4174419fd10bf79a135ea41d24dfc60e8c3390a76d1a4
+      - image: us-east4-docker.pkg.dev/fb-registry/fb-publicrepo/mandarin-ocr-app:0.02
         name: mandarin-ocr-app
         resources: {}
 status: {}
